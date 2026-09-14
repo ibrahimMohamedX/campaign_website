@@ -1,662 +1,466 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" dir="ltr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <meta name="theme-color" content="#0a0a0a">
-    <meta name="description" content="Campaign Content Scheduler">
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="description" content="Campaign Content Scheduler" />
     <title>CampaignFlow — Content Scheduler</title>
-
-    <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-
-<div class="app-shell">
-
-    <!-- ==================== SIDEBAR ==================== -->
-    <aside class="sidebar" id="sidebar">
-
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- ==================== SIDEBAR ==================== -->
+      <aside class="sidebar" id="sidebar">
         <div class="brand">
-            <div class="brand-mark">
-                <span></span>
-                <span></span>
-            </div>
-
-            <div class="brand-text">
-                <strong>Campaign<span>Flow</span></strong>
-                <small id="brandSubtitle">Content Scheduler</small>
-            </div>
+          <div class="brand-mark">
+            <span></span>
+            <span></span>
+          </div>
+          <div class="brand-text">
+            <strong>Campaign<span>Flow</span></strong>
+            <small id="brandSubtitle">Content Scheduler</small>
+          </div>
         </div>
 
         <div class="sidebar-divider"></div>
 
         <nav class="sidebar-nav">
-
-            <button class="nav-item active" data-section="scheduler">
-                <span class="nav-icon">▦</span>
-                <span data-i18n="scheduler">Scheduler</span>
-            </button>
-
-            <button class="nav-item" data-section="settings">
-                <span class="nav-icon">⚙</span>
-                <span data-i18n="settings">Settings</span>
-            </button>
-
+          <button class="nav-item active" data-section="scheduler">
+            <span class="nav-icon">▦</span>
+            <span data-i18n="scheduler">Scheduler</span>
+          </button>
+          <button class="nav-item" data-section="settings">
+            <span class="nav-icon">⚙</span>
+            <span data-i18n="settings">Settings</span>
+          </button>
         </nav>
 
-        <div class="sidebar-bottom">
-
-            <button class="sidebar-action" id="languageToggle">
-                <span class="nav-icon">文</span>
-                <span id="languageLabel">العربية</span>
-            </button>
-
-            <button class="sidebar-action" id="themeToggle">
-                <span class="nav-icon" id="themeIcon">☾</span>
-                <span data-i18n="darkMode">Dark Mode</span>
-            </button>
-
+        <div class="sidebar-divider" style="margin-top: 15px"></div>
+        <div class="sidebar-section-title" data-i18n="savedSchedules">
+          Saved Schedules
         </div>
 
-    </aside>
+        <div class="saved-schedules-list" id="savedSchedulesContainer">
+          <!-- Saved schedules rendered dynamically -->
+        </div>
+        <div
+          id="savedSchedulesEmpty"
+          class="saved-schedules-empty"
+          data-i18n="noSavedSchedules"
+        >
+          No saved schedules yet.
+        </div>
 
-    <!-- ==================== MAIN ==================== -->
-    <main class="main-content">
+        <div class="sidebar-bottom">
+          <button class="sidebar-action" id="languageToggle">
+            <span class="nav-icon">文</span>
+            <span id="languageLabel">العربية</span>
+          </button>
+          <button class="sidebar-action" id="themeToggle">
+            <span class="nav-icon" id="themeIcon">☾</span>
+            <span data-i18n="darkMode">Dark Mode</span>
+          </button>
+        </div>
+      </aside>
 
+      <!-- ==================== MAIN ==================== -->
+      <main class="main-content">
         <!-- Topbar -->
         <header class="topbar">
-
-            <button class="mobile-menu" id="mobileMenu">
-                ☰
+          <button class="mobile-menu" id="mobileMenu">☰</button>
+          <div class="page-title">
+            <span class="eyebrow" data-i18n="workspace">WORKSPACE</span>
+            <h1 id="pageTitle" data-i18n="campaignScheduler">
+              Campaign Scheduler
+            </h1>
+          </div>
+          <div class="topbar-actions">
+            <button
+              class="icon-button"
+              id="printBtn"
+              title="Print"
+              aria-label="Print"
+            >
+              ⎙
             </button>
-
-            <div class="page-title">
-                <span class="eyebrow" data-i18n="workspace">WORKSPACE</span>
-                <h1 id="pageTitle" data-i18n="campaignScheduler">
-                    Campaign Scheduler
-                </h1>
-            </div>
-
-            <div class="topbar-actions">
-
-                <button class="icon-button" id="printBtn" title="Print">
-                    ⎙
-                </button>
-
-                <button class="primary-button small" id="newScheduleBtn">
-                    <span>＋</span>
-                    <span data-i18n="newSchedule">New Schedule</span>
-                </button>
-
-            </div>
-
+            <button class="primary-button small" id="newScheduleBtn">
+              <span>＋</span>
+              <span data-i18n="newSchedule">New Schedule</span>
+            </button>
+          </div>
         </header>
-
 
         <!-- ==================== SCHEDULER SECTION ==================== -->
         <section class="page-section active-section" id="schedulerSection">
+          <!-- Hero -->
+          <div class="hero-card">
+            <div class="hero-content">
+              <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                <span data-i18n="smartPlanning">SMART CONTENT PLANNING</span>
+              </div>
+              <h2 data-i18n="heroTitle">
+                Plan your campaigns.<br />
+                <span>Publish with purpose.</span>
+              </h2>
+              <p data-i18n="heroDescription">
+                Build a complete content schedule with posts and stories
+                automatically distributed across your campaigns.
+              </p>
+            </div>
+            <div class="hero-decoration">
+              <div class="orbit orbit-1"></div>
+              <div class="orbit orbit-2"></div>
+              <div class="orbit-center">CF</div>
+            </div>
+          </div>
 
-            <!-- Hero -->
-            <div class="hero-card">
-
-                <div class="hero-content">
-
-                    <div class="hero-badge">
-                        <span class="pulse-dot"></span>
-                        <span data-i18n="smartPlanning">SMART CONTENT PLANNING</span>
-                    </div>
-
-                    <h2 data-i18n="heroTitle">
-                        Plan your campaigns.<br>
-                        <span>Publish with purpose.</span>
-                    </h2>
-
-                    <p data-i18n="heroDescription">
-                        Build a complete content schedule with posts and stories automatically distributed across your campaigns.
-                    </p>
-
-                </div>
-
-                <div class="hero-decoration">
-                    <div class="orbit orbit-1"></div>
-                    <div class="orbit orbit-2"></div>
-                    <div class="orbit-center">CF</div>
-                </div>
-
+          <!-- Setup Card -->
+          <div class="section-card" id="setupCard">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker" data-i18n="configuration"
+                  >CONFIGURATION</span
+                >
+                <h2 data-i18n="buildSchedule">Build your schedule</h2>
+                <p data-i18n="configurationDescription">
+                  Define your campaigns and publishing preferences.
+                </p>
+              </div>
+              <div class="campaign-limit">
+                <span id="campaignCount">1</span>/3
+              </div>
             </div>
 
-
-            <!-- Setup Card -->
-            <div class="section-card" id="setupCard">
-
-                <div class="section-header">
-
-                    <div>
-                        <span class="section-kicker" data-i18n="configuration">
-                            CONFIGURATION
-                        </span>
-
-                        <h2 data-i18n="buildSchedule">
-                            Build your schedule
-                        </h2>
-
-                        <p data-i18n="configurationDescription">
-                            Define your campaigns and publishing preferences.
-                        </p>
-                    </div>
-
-                    <div class="campaign-limit">
-                        <span id="campaignCount">1</span>/3
-                    </div>
-
-                </div>
-
-
-                <!-- Campaigns -->
-                <div class="campaigns-wrapper">
-
-                    <div class="campaigns-header">
-
-                        <h3 data-i18n="campaigns">
-                            Campaigns
-                        </h3>
-
-                        <button class="secondary-button" id="addCampaignBtn">
-                            ＋
-                            <span data-i18n="addCampaign">Add Campaign</span>
-                        </button>
-
-                    </div>
-
-                    <div id="campaignsContainer"></div>
-
-                </div>
-
-
-                <!-- Global Settings -->
-                <div class="schedule-settings">
-
-                    <div class="settings-header">
-                        <h3 data-i18n="scheduleSettings">
-                            Schedule Settings
-                        </h3>
-                    </div>
-
-                    <div class="settings-grid">
-
-                        <div class="input-group">
-
-                            <label for="story1Time" data-i18n="story1Time">
-                                Story 1 Time
-                            </label>
-
-                            <div class="time-input-wrapper">
-                                <span>◷</span>
-                                <input type="time" id="story1Time" value="09:00">
-                            </div>
-
-                            <small data-i18n="story1Hint">
-                                Before the post
-                            </small>
-
-                        </div>
-
-
-                        <div class="input-group">
-
-                            <label for="postTime" data-i18n="postTime">
-                                Post Time
-                            </label>
-
-                            <div class="time-input-wrapper">
-                                <span>◷</span>
-                                <input type="time" id="postTime" value="11:00">
-                            </div>
-
-                            <small data-i18n="postHint">
-                                Main publishing time
-                            </small>
-
-                        </div>
-
-
-                        <div class="input-group">
-
-                            <label for="story2Time" data-i18n="story2Time">
-                                Story 2 Time
-                            </label>
-
-                            <div class="time-input-wrapper">
-                                <span>◷</span>
-                                <input type="time" id="story2Time" value="13:00">
-                            </div>
-
-                            <small data-i18n="story2Hint">
-                                After the post
-                            </small>
-
-                        </div>
-
-
-                        <div class="input-group">
-
-                            <label for="followup1Time" data-i18n="followup1Time">
-                                Follow-up 1
-                            </label>
-
-                            <div class="time-input-wrapper">
-                                <span>◷</span>
-                                <input type="time" id="followup1Time" value="15:00">
-                            </div>
-
-                            <small data-i18n="followupHint">
-                                Older story
-                            </small>
-
-                        </div>
-
-
-                        <div class="input-group">
-
-                            <label for="followup2Time" data-i18n="followup2Time">
-                                Follow-up 2
-                            </label>
-
-                            <div class="time-input-wrapper">
-                                <span>◷</span>
-                                <input type="time" id="followup2Time" value="17:00">
-                            </div>
-
-                            <small data-i18n="followupHint">
-                                Older story
-                            </small>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- Generate -->
-                <div class="generate-area">
-
-                    <div class="strategy-info">
-
-                        <div class="strategy-icon">
-                            ✦
-                        </div>
-
-                        <div>
-                            <strong data-i18n="automaticStrategy">
-                                Automatic Strategy
-                            </strong>
-
-                            <p data-i18n="strategyDescription">
-                                Posts rotate between campaigns while each post follows the S1 → Post → S2 → S3 → S4 sequence.
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <button class="generate-button" id="generateBtn">
-
-                        <span data-i18n="generateSchedule">
-                            Generate Schedule
-                        </span>
-
-                        <span class="generate-arrow">
-                            →
-                        </span>
-
-                    </button>
-
-                </div>
-
+            <!-- Campaigns -->
+            <div class="campaigns-wrapper">
+              <div class="campaigns-header">
+                <h3 data-i18n="campaigns">Campaigns</h3>
+                <button class="secondary-button" id="addCampaignBtn">
+                  ＋ <span data-i18n="addCampaign">Add Campaign</span>
+                </button>
+              </div>
+              <div id="campaignsContainer"></div>
             </div>
 
-
-            <!-- Schedule Result -->
-            <div class="result-section hidden" id="resultSection">
-
-                <div class="result-header">
-
-                    <div>
-
-                        <span class="section-kicker" data-i18n="yourSchedule">
-                            YOUR SCHEDULE
-                        </span>
-
-                        <h2 id="scheduleTitle">
-                            Content Calendar
-                        </h2>
-
-                        <p id="scheduleSummary"></p>
-
-                    </div>
-
-                    <div class="result-actions">
-
-                        <button class="secondary-button" id="editScheduleBtn">
-                            ✎
-                            <span data-i18n="editSchedule">Edit</span>
-                        </button>
-
-                        <button class="secondary-button" id="printScheduleBtn">
-                            ⎙
-                            <span data-i18n="print">Print</span>
-                        </button>
-
-                    </div>
-
+            <!-- Global Settings -->
+            <div class="schedule-settings">
+              <div class="settings-header">
+                <h3 data-i18n="scheduleSettings">Schedule Settings</h3>
+              </div>
+              <div class="settings-grid">
+                <div class="input-group">
+                  <label for="story1Time" data-i18n="story1Time"
+                    >Story 1 Time</label
+                  >
+                  <div class="time-input-wrapper">
+                    <span>◷</span>
+                    <input type="time" id="story1Time" value="09:00" />
+                  </div>
+                  <small data-i18n="story1Hint">Before the post</small>
                 </div>
-
-
-                <!-- Legend -->
-                <div class="campaign-legend" id="campaignLegend"></div>
-
-
-                <!-- Table wrapper -->
-                <div class="calendar-wrapper">
-
-                    <div class="calendar-scroll">
-
-                        <table class="calendar-table">
-
-                            <thead>
-                                <tr>
-                                    <th class="date-column" data-i18n="date">Date</th>
-                                    <th class="day-column" data-i18n="day">Day</th>
-
-                                    <th>
-                                        <span class="time-head">09:00</span>
-                                        <small id="headStory1">AM</small>
-                                    </th>
-
-                                    <th>
-                                        <span class="time-head">11:00</span>
-                                        <small id="headPost">AM</small>
-                                    </th>
-
-                                    <th>
-                                        <span class="time-head">13:00</span>
-                                        <small id="headStory2">PM</small>
-                                    </th>
-
-                                    <th>
-                                        <span class="time-head">15:00</span>
-                                        <small id="headFollow1">PM</small>
-                                    </th>
-
-                                    <th>
-                                        <span class="time-head">17:00</span>
-                                        <small id="headFollow2">PM</small>
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="calendarBody"></tbody>
-
-                        </table>
-
-                    </div>
-
+                <div class="input-group">
+                  <label for="postTime" data-i18n="postTime">Post Time</label>
+                  <div class="time-input-wrapper">
+                    <span>◷</span>
+                    <input type="time" id="postTime" value="11:00" />
+                  </div>
+                  <small data-i18n="postHint">Main publishing time</small>
                 </div>
-
-
-                <div class="calendar-footer">
-
-                    <div>
-                        <span class="footer-dot"></span>
-                        <span data-i18n="clickCell">
-                            Click any cell to view details
-                        </span>
-                    </div>
-
-                    <button class="text-button" id="backToTop">
-                        ↑
-                        <span data-i18n="backToSetup">
-                            Back to setup
-                        </span>
-                    </button>
-
+                <div class="input-group">
+                  <label for="story2Time" data-i18n="story2Time"
+                    >Story 2 Time</label
+                  >
+                  <div class="time-input-wrapper">
+                    <span>◷</span>
+                    <input type="time" id="story2Time" value="13:00" />
+                  </div>
+                  <small data-i18n="story2Hint">After the post</small>
                 </div>
-
+                <div class="input-group">
+                  <label for="followup1Time" data-i18n="followup1Time"
+                    >Follow-up 1</label
+                  >
+                  <div class="time-input-wrapper">
+                    <span>◷</span>
+                    <input type="time" id="followup1Time" value="15:00" />
+                  </div>
+                  <small data-i18n="followupHint">Older story</small>
+                </div>
+                <div class="input-group">
+                  <label for="followup2Time" data-i18n="followup2Time"
+                    >Follow-up 2</label
+                  >
+                  <div class="time-input-wrapper">
+                    <span>◷</span>
+                    <input type="time" id="followup2Time" value="17:00" />
+                  </div>
+                  <small data-i18n="followupHint">Older story</small>
+                </div>
+              </div>
             </div>
 
+            <!-- Generate -->
+            <div class="generate-area">
+              <div class="strategy-info">
+                <div class="strategy-icon">✦</div>
+                <div>
+                  <strong data-i18n="automaticStrategy"
+                    >Automatic Strategy</strong
+                  >
+                  <p data-i18n="strategyDescription">
+                    Posts rotate between campaigns while each post follows the
+                    S1 → Post → S2 → S3 → S4 sequence.
+                  </p>
+                </div>
+              </div>
+              <button class="generate-button" id="generateBtn">
+                <span data-i18n="generateSchedule">Generate Schedule</span>
+                <span class="generate-arrow">→</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Schedule Result -->
+          <div class="result-section hidden" id="resultSection">
+            <div class="result-header">
+              <div>
+                <span class="section-kicker" data-i18n="yourSchedule"
+                  >YOUR SCHEDULE</span
+                >
+                <h2 id="scheduleTitle">Content Calendar</h2>
+                <p id="scheduleSummary"></p>
+              </div>
+              <div class="result-actions">
+                <button class="primary-button" id="saveScheduleBtn">
+                  ✓
+                  <span id="saveBtnText" data-i18n="saveSchedule"
+                    >Save Schedule</span
+                  >
+                </button>
+                <button class="secondary-button" id="editScheduleBtn">
+                  ✎ <span data-i18n="editSchedule">Edit</span>
+                </button>
+                <button class="secondary-button" id="printScheduleBtn">
+                  ⎙ <span data-i18n="print">Print</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="campaign-legend" id="campaignLegend"></div>
+
+            <!-- Table wrapper -->
+            <div class="calendar-wrapper">
+              <div class="calendar-scroll">
+                <table class="calendar-table">
+                  <thead>
+                    <tr>
+                      <th class="date-column" data-i18n="date">Date</th>
+                      <th class="day-column" data-i18n="day">Day</th>
+                      <th>
+                        <span class="time-head">09:00</span>
+                        <small id="headStory1">AM</small>
+                      </th>
+                      <th>
+                        <span class="time-head">11:00</span>
+                        <small id="headPost">AM</small>
+                      </th>
+                      <th>
+                        <span class="time-head">13:00</span>
+                        <small id="headStory2">PM</small>
+                      </th>
+                      <th>
+                        <span class="time-head">15:00</span>
+                        <small id="headFollow1">PM</small>
+                      </th>
+                      <th>
+                        <span class="time-head">17:00</span>
+                        <small id="headFollow2">PM</small>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="calendarBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="calendar-footer">
+              <div>
+                <span class="footer-dot"></span>
+                <span data-i18n="clickCell"
+                  >Click any cell to view details</span
+                >
+              </div>
+              <button class="text-button" id="backToTop">
+                ↑ <span data-i18n="backToSetup">Back to setup</span>
+              </button>
+            </div>
+          </div>
         </section>
-
 
         <!-- ==================== SETTINGS SECTION ==================== -->
         <section class="page-section" id="settingsSection">
-
-            <div class="section-card settings-page">
-
-                <div class="section-header">
-
-                    <div>
-                        <span class="section-kicker">SETTINGS</span>
-
-                        <h2 data-i18n="applicationSettings">
-                            Application Settings
-                        </h2>
-
-                        <p data-i18n="applicationSettingsDescription">
-                            Customize your CampaignFlow experience.
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <div class="settings-option">
-
-                    <div>
-                        <strong data-i18n="appearance">
-                            Appearance
-                        </strong>
-
-                        <p data-i18n="appearanceDescription">
-                            Switch between light and dark themes.
-                        </p>
-                    </div>
-
-                    <button class="toggle-switch" id="settingsThemeToggle">
-                        <span></span>
-                    </button>
-
-                </div>
-
-
-                <div class="settings-option">
-
-                    <div>
-                        <strong data-i18n="language">
-                            Language
-                        </strong>
-
-                        <p data-i18n="languageDescription">
-                            Choose the interface language.
-                        </p>
-                    </div>
-
-                    <button class="language-switcher" id="settingsLanguageToggle">
-                        English / العربية
-                    </button>
-
-                </div>
-
-
-                <div class="settings-option danger-option">
-
-                    <div>
-                        <strong data-i18n="clearData">
-                            Clear Saved Data
-                        </strong>
-
-                        <p data-i18n="clearDataDescription">
-                            Remove the saved schedule and reset the application.
-                        </p>
-                    </div>
-
-                    <button class="danger-button" id="clearDataBtn">
-                        <span data-i18n="clear">
-                            Clear
-                        </span>
-                    </button>
-
-                </div>
-
+          <div class="section-card settings-page">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">SETTINGS</span>
+                <h2 data-i18n="applicationSettings">Application Settings</h2>
+                <p data-i18n="applicationSettingsDescription">
+                  Customize your CampaignFlow experience.
+                </p>
+              </div>
             </div>
-
+            <div class="settings-option">
+              <div>
+                <strong data-i18n="appearance">Appearance</strong>
+                <p data-i18n="appearanceDescription">
+                  Switch between light and dark themes.
+                </p>
+              </div>
+              <button
+                class="toggle-switch"
+                id="settingsThemeToggle"
+                aria-label="Toggle Theme"
+              >
+                <span></span>
+              </button>
+            </div>
+            <div class="settings-option">
+              <div>
+                <strong data-i18n="language">Language</strong>
+                <p data-i18n="languageDescription">
+                  Choose the interface language.
+                </p>
+              </div>
+              <button class="language-switcher" id="settingsLanguageToggle">
+                English / العربية
+              </button>
+            </div>
+            <div class="settings-option danger-option">
+              <div>
+                <strong data-i18n="clearData">Clear Saved Data</strong>
+                <p data-i18n="clearDataDescription">
+                  Remove the saved schedules and reset the application.
+                </p>
+              </div>
+              <button class="danger-button" id="clearDataBtn">
+                <span data-i18n="clear">Clear</span>
+              </button>
+            </div>
+          </div>
         </section>
-
-    </main>
-
-</div>
-
-
-<!-- ==================== DETAILS MODAL ==================== -->
-<div class="modal-overlay" id="detailsModal">
-
-    <div class="details-modal">
-
-        <button class="modal-close" id="modalClose">
-            ×
-        </button>
-
-        <div class="modal-color-bar" id="modalColorBar"></div>
-
-        <div class="modal-content">
-
-            <div class="modal-top">
-
-                <div class="modal-type-icon" id="modalTypeIcon">
-                    ●
-                </div>
-
-                <div>
-                    <span class="modal-kicker" id="modalKicker">
-                        CONTENT
-                    </span>
-
-                    <h2 id="modalTitle">
-                        Campaign
-                    </h2>
-                </div>
-
-            </div>
-
-
-            <div class="modal-info-grid">
-
-                <div class="modal-info">
-
-                    <span data-i18n="campaign">
-                        Campaign
-                    </span>
-
-                    <strong id="modalCampaign">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="modal-info">
-
-                    <span data-i18n="contentType">
-                        Content Type
-                    </span>
-
-                    <strong id="modalContentType">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="modal-info">
-
-                    <span data-i18n="sequence">
-                        Sequence
-                    </span>
-
-                    <strong id="modalSequence">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="modal-info">
-
-                    <span data-i18n="date">
-                        Date
-                    </span>
-
-                    <strong id="modalDate">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="modal-info">
-
-                    <span data-i18n="day">
-                        Day
-                    </span>
-
-                    <strong id="modalDay">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="modal-info">
-
-                    <span data-i18n="publishTime">
-                        Publish Time
-                    </span>
-
-                    <strong id="modalTime">
-                        —
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="modal-description" id="modalDescription">
-                —
-            </div>
-
-        </div>
-
+      </main>
     </div>
 
-</div>
+    <!-- ==================== DETAILS MODAL ==================== -->
+    <div class="modal-overlay" id="detailsModal">
+      <div class="details-modal">
+        <button class="modal-close" id="modalClose" aria-label="Close">
+          ×
+        </button>
+        <div class="modal-color-bar" id="modalColorBar"></div>
+        <div class="modal-content">
+          <div class="modal-top">
+            <div class="modal-type-icon" id="modalTypeIcon">●</div>
+            <div>
+              <span class="modal-kicker" id="modalKicker">CONTENT</span>
+              <h2 id="modalTitle">Campaign</h2>
+            </div>
+            <button
+              class="secondary-button"
+              id="modalDoneBtn"
+              style="margin-inline-start: auto"
+            >
+              ✓ <span id="modalDoneText" data-i18n="markDone">Mark Done</span>
+            </button>
+          </div>
+          <div class="modal-info-grid">
+            <div class="modal-info">
+              <span data-i18n="campaign">Campaign</span>
+              <strong id="modalCampaign">—</strong>
+            </div>
+            <div class="modal-info">
+              <span data-i18n="contentType">Content Type</span>
+              <strong id="modalContentType">—</strong>
+            </div>
+            <div class="modal-info">
+              <span data-i18n="sequence">Sequence</span>
+              <strong id="modalSequence">—</strong>
+            </div>
+            <div class="modal-info">
+              <span data-i18n="date">Date</span>
+              <strong id="modalDate">—</strong>
+            </div>
+            <div class="modal-info">
+              <span data-i18n="day">Day</span>
+              <strong id="modalDay">—</strong>
+            </div>
+            <div class="modal-info">
+              <span data-i18n="publishTime">Publish Time</span>
+              <strong id="modalTime">—</strong>
+            </div>
+          </div>
+          <div class="modal-description" id="modalDescription">—</div>
+        </div>
+      </div>
+    </div>
 
+    <!-- ==================== SAVE SCHEDULE MODAL ==================== -->
+    <div class="modal-overlay" id="saveScheduleModal">
+      <div class="details-modal save-schedule-dialog">
+        <div class="modal-content">
+          <h2
+            id="saveScheduleTitle"
+            data-i18n="saveScheduleTitle"
+            style="font-size: 24px; margin-bottom: 8px"
+          >
+            Save Schedule
+          </h2>
+          <p
+            data-i18n="scheduleNameDescription"
+            style="font-size: 14px; color: var(--text-2); margin-bottom: 22px"
+          >
+            Enter a name for this schedule to save it.
+          </p>
+          <div class="field">
+            <label data-i18n="scheduleName" style="font-size: 11px"
+              >Schedule Name</label
+            >
+            <input
+              type="text"
+              id="saveScheduleNameInput"
+              placeholder="e.g. September Campaign"
+              maxlength="50"
+              style="font-size: 14px"
+            />
+          </div>
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              justify-content: flex-end;
+              margin-top: 25px;
+            "
+          >
+            <button class="secondary-button" id="cancelSaveBtn">
+              <span data-i18n="cancel">Cancel</span>
+            </button>
+            <button class="primary-button" id="confirmSaveBtn">
+              <span data-i18n="save">Save</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<!-- ==================== TOAST ==================== -->
-<div class="toast" id="toast">
+    <!-- ==================== TOAST ==================== -->
+    <div class="toast" id="toast">
+      <span class="toast-icon">✓</span>
+      <span id="toastMessage">Done</span>
+    </div>
 
-    <span class="toast-icon">✓</span>
-
-    <span id="toastMessage">
-        Done
-    </span>
-
-</div>
-
-
-<script src="script.js"></script>
-
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
