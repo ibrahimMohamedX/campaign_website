@@ -1274,8 +1274,8 @@ input:focus-visible {
 
 .content-sequence {
   font-weight: 700;
-  font-size: 12px;
-  color: black;
+  font-size: 13px;
+  color: var(--text-3);
   display: block;
 }
 
@@ -1513,7 +1513,7 @@ input:focus-visible {
 }
 
 .modal-info strong {
-  display: block;
+  /* display: block; */
   font-size: 13px; /* typography boost */
   color: var(--text);
 }
@@ -1622,4 +1622,46 @@ input:focus-visible {
   .modal-info-grid {
     grid-template-columns: 1fr;
   }
+}
+/* Calendar Card Enhancements */
+.content-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  /* Ensure the card strictly adheres to the LTR calendar flow */
+  text-align: match-parent;
+}
+
+.content-type {
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--primary-text-color, #111);
+}
+
+.content-post-number {
+  font-size: 0.85em;
+  font-weight: 600;
+  /* Uses a secondary color for hierarchy; adapts to Light/Dark mode variables */
+  color: var(--secondary-text-color, #555);
+  background-color: var(--highlight-bg-color, rgba(0, 0, 0, 0.05));
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: 2px;
+}
+
+/* Ensure Latin digits are unaffected by RTL text flipping */
+.content-post-number span[dir="ltr"],
+.post-number-display span[dir="ltr"] {
+  display: inline-block;
+  unicode-bidi: isolate;
+}
+
+.content-meta {
+  font-size: 0.75em;
+  color: var(--tertiary-text-color, #777);
+  display: flex;
+  flex-direction: column;
 }

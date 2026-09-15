@@ -776,12 +776,14 @@ function createContentCard(item) {
   card.dataset.slotId = item.slotId;
 
   const isDone = item.completed;
+  const postNumLabel = getFormattedPostNumber(item, "en");
 
   card.innerHTML = `
         <button class="done-btn" aria-label="${translations[state.language].markDone}" title="${translations[state.language].markDone}">✓</button>
         <span class="content-dot" style="background:${item.color}"></span>
         <div class="content-details">
             <div class="content-campaign">${escapeHtml(item.campaignName)}</div>
+            <div class="content-post-number">${postNumLabel}</div>
             <span class="content-label">${escapeHtml(item.label)}</span>
             <span class="content-sequence">${escapeHtml(item.sequence)} · ${escapeHtml(formatTime(item.time))}</span>
         </div>
@@ -1049,6 +1051,19 @@ function openDetailsModal(item) {
       ? translations[state.language].post
       : translations[state.language].content;
   $("#modalDescription").textContent = item.description;
+  // Inside your openDetailsDialog(item) function
+  const dialogTypeEl = document.getElementById("dialog-content-type");
+  const dialogPostNumEl = document.getElementById("dialog-post-number"); // Ensure this element exists in your HTML
+
+  if (dialogTypeEl) {
+    dialogTypeEl.textContent = item.contentType;
+  }
+  if (dialogPostNumEl) {
+    // Use innerHTML because getFormattedPostNumber includes a <span> for Latin digit enforcement
+    dialogPostNumEl.innerHTML = getFormattedPostNumber(item, "en");
+  }
+
+  // ... continue populating date, time, and completion state ...
 
   updateModalDoneBtn();
 }
@@ -1406,4 +1421,39 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return escapeHtml(value);
+}
+/**
+ * Safely retrieves and formats the parent post number.
+ * Ensures digits remain Latin (1, 2, 3) across all languages.
+ */
+function getFormattedPostNumber(item, currentLang) {
+  // 1. Primary: Use the explicit postNumber from generated schedule
+  let rawNum = item.postNumber;
+
+  // 2. Fallback for legacy saved schedules that might lack postNumber
+  if (rawNum === undefined || rawNum === null) {
+    if (typeof item.postIndex === "number") {
+      rawNum = item.postIndex + 1; // Assuming 0-indexed fallback
+    } else if (item.parentPostNumber) {
+      rawNum = item.parentPostNumber;
+    } else if (item.id && item.id.match(/post-(\d+)/i)) {
+      // Only extract from ID if the exact pattern exists
+      rawNum = parseInt(item.id.match(/post-(\d+)/i)[1], 10);
+    } else {
+      // Absolute fallback to prevent rendering "Post #?" or breaking UI
+      rawNum = 1;
+    }
+  }
+
+  // Force standard Latin digits by formatting in en-US
+  const latinDigit = Number(rawNum).toLocaleString("en-US", {
+    useGrouping: false,
+  });
+
+  // Apply translation template
+  const template = currentLang === "ar" ? "منشور #{number}" : "Post #{number}";
+  return template.replace(
+    "{number}",
+    `<strong dir="ltr">${latinDigit}</strong>`,
+  );
 }
