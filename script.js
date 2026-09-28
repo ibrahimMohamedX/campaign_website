@@ -445,11 +445,14 @@ function bindEvents() {
 function handleStrategyChange(event) {
   state.strategy = event.target.value;
 
+  const currentSettings = $("#currentSettings");
   const pipelineSettings = $("#pipelineSettings");
 
   if (state.strategy === "pipeline") {
+    currentSettings.classList.add("hidden");
     pipelineSettings.classList.remove("hidden");
   } else {
+    currentSettings.classList.remove("hidden");
     pipelineSettings.classList.add("hidden");
   }
 
@@ -736,19 +739,24 @@ function generatePipelineSchedule() {
 
   const postQueue = buildPipelinePostQueue(campaigns);
 
-  if (!postQueue.length) return;
+  if (!postQueue.length) {
+    return;
+  }
 
   const scheduleMap = new Map();
 
   postQueue.forEach((post) => {
     const postDay = parseDate(post.date);
+    const postDayKey = toISODate(postDay);
 
-    // Day before: S1
+    // ==========================================
+    // Day before POST → S1
+    // ==========================================
     const s1Date = getPreviousPublishingDay(postDay);
 
     addPipelineScheduleItem(scheduleMap, s1Date, {
       ...post,
-      date: toISODate(s1Date),
+      date: s1Date,
       type: "story",
       sequence: "S1",
       time: times.s1Time,
@@ -757,9 +765,12 @@ function generatePipelineSchedule() {
       contentFormat: "story+reel",
     });
 
-    // Post day: Main Post
-    addPipelineScheduleItem(scheduleMap, toISODate(postDay), {
+    // ==========================================
+    // POST day → Main Post
+    // ==========================================
+    addPipelineScheduleItem(scheduleMap, postDayKey, {
       ...post,
+      date: postDayKey,
       type: "post",
       sequence: "POST",
       time: times.postTime,
@@ -768,9 +779,12 @@ function generatePipelineSchedule() {
       contentFormat: "post+story-share",
     });
 
-    // Post day: S3
-    addPipelineScheduleItem(scheduleMap, toISODate(postDay), {
+    // ==========================================
+    // POST day → S3
+    // ==========================================
+    addPipelineScheduleItem(scheduleMap, postDayKey, {
       ...post,
+      date: postDayKey,
       type: "story",
       sequence: "S3",
       time: times.s3Time,
@@ -779,16 +793,10 @@ function generatePipelineSchedule() {
       contentFormat: "story+reel",
     });
 
-    // Day after: S2
-    function getNextPublishingDay(date) {
-      let result = addDays(new Date(date), 1);
-
-      while (isFriday(result)) {
-        result = addDays(result, 1);
-      }
-
-      return toISODate(result);
-    }
+    // ==========================================
+    // Day after POST → S2 + S4
+    // ==========================================
+    const nextPublishingDay = getNextPublishingDay(postDay);
 
     addPipelineScheduleItem(scheduleMap, nextPublishingDay, {
       ...post,
@@ -801,7 +809,6 @@ function generatePipelineSchedule() {
       contentFormat: "story",
     });
 
-    // Same next day: S4
     addPipelineScheduleItem(scheduleMap, nextPublishingDay, {
       ...post,
       date: nextPublishingDay,
@@ -894,12 +901,11 @@ function buildPipelinePostQueue(campaigns) {
     ...campaigns.map((campaign) => Number(campaign.posts) || 0),
   );
 
-  // Campaign start date = Day 1 of the pipeline.
-  let pipelineDay = parseDate(campaigns[0].startDate);
+  // Campaign start date = Day 1 = first S1
+  const pipelineStartDate = parseDate(campaigns[0].startDate);
 
-  // Day 1 is the S1 day.
-  // First Main Post is therefore on the next publishing day.
-  let postDate = getNextPublishingDay(pipelineDay);
+  // First POST is on Day 2
+  let postDate = getNextPublishingDay(pipelineStartDate);
 
   for (let postNumber = 1; postNumber <= maxPosts; postNumber++) {
     for (
@@ -923,7 +929,7 @@ function buildPipelinePostQueue(campaigns) {
         date: postDate,
       });
 
-      // Next Main Post is 2 publishing days later.
+      // Next POST = 2 publishing days later
       postDate = addPublishingDays(parseDate(postDate), 2);
     }
   }
@@ -946,45 +952,29 @@ function addPublishingDays(date, days) {
   return toISODate(result);
 }
 
-function getPipelinePostDate(queueIndex, campaigns) {
-  const firstCampaignDate = parseDate(campaigns[0].startDate);
-
-  let date = getNextPublishingDate(firstCampaignDate, queueIndex * 2);
-
-  return date;
-}
-
-function getNextPublishingDate(startDate, publishingDayOffset) {
-  let date = new Date(startDate);
-  let remaining = publishingDayOffset;
+function addPublishingDays(date, days) {
+  let result = new Date(date);
+  let remaining = days;
 
   while (remaining > 0) {
-    date = addDays(date, 1);
+    result = addDays(result, 1);
 
-    if (!isFriday(date)) {
+    if (!isFriday(result)) {
       remaining--;
     }
   }
 
-  while (isFriday(date)) {
-    date = addDays(date, 1);
-  }
-
-  return toISODate(date);
+  return toISODate(result);
 }
 
 function getNextPublishingDay(date) {
-  let result = new Date(date);
+  let result = addDays(new Date(date), 1);
 
   while (isFriday(result)) {
     result = addDays(result, 1);
   }
 
   return toISODate(result);
-}
-
-function isFriday(date) {
-  return date.getDay() === 5;
 }
 
 function getPreviousPublishingDay(date) {
@@ -995,6 +985,10 @@ function getPreviousPublishingDay(date) {
   }
 
   return toISODate(result);
+}
+
+function isFriday(date) {
+  return date.getDay() === 5;
 }
 
 function addScheduleItem(scheduleMap, date, item) {
@@ -1545,14 +1539,21 @@ function syncPipelineSettingsInputs() {
   const pipelineRadio = $("#strategyPipeline");
   const currentRadio = $("#strategyCurrent");
 
+  const currentSettings = $("#currentSettings");
+  const pipelineSettings = $("#pipelineSettings");
+
   if (state.strategy === "pipeline") {
     pipelineRadio.checked = true;
     currentRadio.checked = false;
-    $("#pipelineSettings").classList.remove("hidden");
+
+    currentSettings.classList.add("hidden");
+    pipelineSettings.classList.remove("hidden");
   } else {
     currentRadio.checked = true;
     pipelineRadio.checked = false;
-    $("#pipelineSettings").classList.add("hidden");
+
+    currentSettings.classList.remove("hidden");
+    pipelineSettings.classList.add("hidden");
   }
 }
 

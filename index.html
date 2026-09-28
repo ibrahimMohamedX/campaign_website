@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en" dir="ltr">
   <head>
+    <link rel="icon" href="data:," />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0a0a0a" />
@@ -186,57 +187,59 @@
 
             <!-- Global Settings -->
             <div class="schedule-settings">
-              <div class="settings-header">
-                <h3 data-i18n="scheduleSettings">Schedule Settings</h3>
-              </div>
-              <div class="settings-grid">
-                <div class="input-group">
-                  <label for="story1Time" data-i18n="story1Time"
-                    >Story 1 Time</label
-                  >
-                  <div class="time-input-wrapper">
-                    <span>◷</span>
-                    <input type="time" id="story1Time" value="09:00" />
-                  </div>
-                  <small data-i18n="story1Hint">Before the post</small>
+              <div id="currentSettings">
+                <div class="settings-header">
+                  <h3 data-i18n="scheduleSettings">Schedule Settings</h3>
                 </div>
-                <div class="input-group">
-                  <label for="postTime" data-i18n="postTime">Post Time</label>
-                  <div class="time-input-wrapper">
-                    <span>◷</span>
-                    <input type="time" id="postTime" value="11:00" />
+                <div class="settings-grid">
+                  <div class="input-group">
+                    <label for="story1Time" data-i18n="story1Time"
+                      >Story 1 Time</label
+                    >
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="story1Time" value="09:00" />
+                    </div>
+                    <small data-i18n="story1Hint">Before the post</small>
                   </div>
-                  <small data-i18n="postHint">Main publishing time</small>
-                </div>
-                <div class="input-group">
-                  <label for="story2Time" data-i18n="story2Time"
-                    >Story 2 Time</label
-                  >
-                  <div class="time-input-wrapper">
-                    <span>◷</span>
-                    <input type="time" id="story2Time" value="13:00" />
+                  <div class="input-group">
+                    <label for="postTime" data-i18n="postTime">Post Time</label>
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="postTime" value="11:00" />
+                    </div>
+                    <small data-i18n="postHint">Main publishing time</small>
                   </div>
-                  <small data-i18n="story2Hint">After the post</small>
-                </div>
-                <div class="input-group">
-                  <label for="followup1Time" data-i18n="followup1Time"
-                    >Follow-up 1</label
-                  >
-                  <div class="time-input-wrapper">
-                    <span>◷</span>
-                    <input type="time" id="followup1Time" value="15:00" />
+                  <div class="input-group">
+                    <label for="story2Time" data-i18n="story2Time"
+                      >Story 2 Time</label
+                    >
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="story2Time" value="13:00" />
+                    </div>
+                    <small data-i18n="story2Hint">After the post</small>
                   </div>
-                  <small data-i18n="followupHint">Older story</small>
-                </div>
-                <div class="input-group">
-                  <label for="followup2Time" data-i18n="followup2Time"
-                    >Follow-up 2</label
-                  >
-                  <div class="time-input-wrapper">
-                    <span>◷</span>
-                    <input type="time" id="followup2Time" value="17:00" />
+                  <div class="input-group">
+                    <label for="followup1Time" data-i18n="followup1Time"
+                      >Follow-up 1</label
+                    >
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="followup1Time" value="15:00" />
+                    </div>
+                    <small data-i18n="followupHint">Older story</small>
                   </div>
-                  <small data-i18n="followupHint">Older story</small>
+                  <div class="input-group">
+                    <label for="followup2Time" data-i18n="followup2Time"
+                      >Follow-up 2</label
+                    >
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="followup2Time" value="17:00" />
+                    </div>
+                    <small data-i18n="followupHint">Older story</small>
+                  </div>
                 </div>
               </div>
               <!-- Pipeline Settings -->
