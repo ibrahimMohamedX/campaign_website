@@ -1665,3 +1665,64 @@ input:focus-visible {
   display: flex;
   flex-direction: column;
 }
+/* =========================================================
+   SCHEDULING STRATEGY
+   ========================================================= */
+
+.strategy-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.strategy-option {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.strategy-option input {
+  margin-top: 3px;
+  accent-color: var(--accent-color);
+}
+
+.strategy-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.strategy-option-content strong {
+  font-size: 14px;
+}
+
+.strategy-option-content small {
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.strategy-option:has(input:checked) {
+  border-color: var(--accent-color);
+  background: var(--accent-soft);
+}
+
+.pipeline-settings {
+  margin-top: 20px;
+}
+
+@media (max-width: 700px) {
+  .strategy-options {
+    grid-template-columns: 1fr;
+  }
+}
+.hidden {
+  display: none !important;
+}
