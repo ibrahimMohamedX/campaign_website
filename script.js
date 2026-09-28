@@ -448,6 +448,11 @@ function handleStrategyChange(event) {
   const currentSettings = $("#currentSettings");
   const pipelineSettings = $("#pipelineSettings");
 
+  if (!currentSettings || !pipelineSettings) {
+    console.error("Scheduling settings containers not found.");
+    return;
+  }
+
   if (state.strategy === "pipeline") {
     currentSettings.classList.add("hidden");
     pipelineSettings.classList.remove("hidden");
