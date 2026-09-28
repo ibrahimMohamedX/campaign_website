@@ -14,6 +14,15 @@ const state = {
   theme: localStorage.getItem("cf-theme") || "light",
   campaigns: [],
   schedule: [],
+  strategy: "current",
+
+  pipelineSettings: {
+    s1Time: "09:00",
+    postTime: "11:00",
+    s2Time: "13:00",
+    s3Time: "15:00",
+    s4Time: "17:00",
+  },
   settings: {
     story1Time: "09:00",
     postTime: "11:00",
@@ -133,6 +142,27 @@ const translations = {
     markDone: "Mark Done",
     markIncomplete: "Mark Incomplete",
     duplicateTimes: "Each schedule time must be unique.",
+    //
+    schedulingSystem: "Scheduling System",
+    currentSystem: "Current System",
+    currentSystemDescription: "Use the existing scheduling system.",
+    pipelineSystem: "Pipeline System",
+    pipelineSystemDescription:
+      "Continuous overlapping content pipeline with a Friday break.",
+
+    pipelineContentTimes: "Pipeline Content Times",
+    pipelineS1Time: "S1 Time",
+    pipelinePostTime: "Main Post Time",
+    pipelineS2Time: "S2 Time",
+    pipelineS3Time: "S3 Time",
+    pipelineS4Time: "S4 Time",
+
+    pipelineS1Hint: "Day before the main post",
+    pipelinePostHint: "Main post + story share",
+    pipelineS2Hint: "Day after — image story",
+    pipelineS3Hint: "Same day as the main post",
+    pipelineS4Hint: "Day after",
+    //
     currentSchedule: "Current Schedule",
     deleteSavedSchedule: "Delete saved schedule",
   },
@@ -234,6 +264,26 @@ const translations = {
     markDone: "تحديد كمكتمل",
     markIncomplete: "تحديد كغير مكتمل",
     duplicateTimes: "يجب أن تكون جميع مواعيد النشر مختلفة.",
+    //
+    schedulingSystem: "نظام الجدولة",
+    currentSystem: "النظام الحالي",
+    currentSystemDescription: "استخدام نظام الجدولة الحالي.",
+    pipelineSystem: "نظام الـPipeline",
+    pipelineSystemDescription: "نظام محتوى متداخل ومستمر مع إجازة يوم الجمعة.",
+
+    pipelineContentTimes: "مواعيد محتوى الـPipeline",
+    pipelineS1Time: "موعد S1",
+    pipelinePostTime: "موعد البوست الرئيسي",
+    pipelineS2Time: "موعد S2",
+    pipelineS3Time: "موعد S3",
+    pipelineS4Time: "موعد S4",
+
+    pipelineS1Hint: "اليوم السابق للبوست الرئيسي",
+    pipelinePostHint: "البوست الرئيسي + مشاركة الستوري",
+    pipelineS2Hint: "اليوم التالي — ستوري صورة",
+    pipelineS3Hint: "في نفس يوم البوست",
+    pipelineS4Hint: "اليوم التالي",
+    //
     currentSchedule: "الجدول الحالي",
     deleteSavedSchedule: "حذف الجدول المحفوظ",
   },
@@ -283,6 +333,7 @@ function init() {
   }
 
   syncSettingsInputs();
+  syncPipelineSettingsInputs();
   renderSavedSchedules();
 
   if (state.schedule.length > 0) {
@@ -376,6 +427,33 @@ function bindEvents() {
   ].forEach((id) => {
     $("#" + id).addEventListener("change", saveSettingsFromInputs);
   });
+  $$('input[name="schedulingStrategy"]').forEach((input) => {
+    input.addEventListener("change", handleStrategyChange);
+  });
+
+  [
+    "pipelineS1Time",
+    "pipelinePostTime",
+    "pipelineS2Time",
+    "pipelineS3Time",
+    "pipelineS4Time",
+  ].forEach((id) => {
+    $("#" + id).addEventListener("change", savePipelineSettingsFromInputs);
+  });
+}
+
+function handleStrategyChange(event) {
+  state.strategy = event.target.value;
+
+  const pipelineSettings = $("#pipelineSettings");
+
+  if (state.strategy === "pipeline") {
+    pipelineSettings.classList.remove("hidden");
+  } else {
+    pipelineSettings.classList.add("hidden");
+  }
+
+  saveState();
 }
 
 /* =========================================================
@@ -383,7 +461,7 @@ function bindEvents() {
    ========================================================= */
 
 function addCampaign(data = null) {
-  if (state.campaigns.length >= 3) {
+  if (state.campaigns.length >= 4) {
     showToast(translations[state.language].maxCampaigns);
     return;
   }
@@ -522,6 +600,12 @@ function bindCampaignInputs() {
 function generateSchedule() {
   if (!validateCampaigns()) return;
 
+  if (state.strategy === "pipeline") {
+    generatePipelineSchedule();
+    return;
+  }
+
+  // Existing Current System logic
   // Validate Unique Times
   saveSettingsFromInputs();
   const timesArray = [
@@ -622,6 +706,139 @@ function generateSchedule() {
   resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function generatePipelineSchedule() {
+  savePipelineSettingsFromInputs();
+
+  const campaigns = state.campaigns.map((campaign) => ({
+    ...campaign,
+    posts: Number(campaign.posts),
+  }));
+
+  const times = state.pipelineSettings;
+
+  const timesArray = [
+    times.s1Time,
+    times.postTime,
+    times.s2Time,
+    times.s3Time,
+    times.s4Time,
+  ];
+
+  if (timesArray.some((time) => !time)) {
+    showToast(translations[state.language].campaignRequired);
+    return;
+  }
+
+  if (new Set(timesArray).size !== timesArray.length) {
+    showToast(translations[state.language].duplicateTimes);
+    return;
+  }
+
+  const postQueue = buildPipelinePostQueue(campaigns);
+
+  if (!postQueue.length) return;
+
+  const scheduleMap = new Map();
+
+  postQueue.forEach((post) => {
+    const postDay = parseDate(post.date);
+
+    // Day before: S1
+    const s1Date = getPreviousPublishingDay(postDay);
+
+    addPipelineScheduleItem(scheduleMap, s1Date, {
+      ...post,
+      date: toISODate(s1Date),
+      type: "story",
+      sequence: "S1",
+      time: times.s1Time,
+      label: translations[state.language].story1,
+      description: translations[state.language].prePost,
+      contentFormat: "story+reel",
+    });
+
+    // Post day: Main Post
+    addPipelineScheduleItem(scheduleMap, toISODate(postDay), {
+      ...post,
+      type: "post",
+      sequence: "POST",
+      time: times.postTime,
+      label: translations[state.language].post,
+      description: translations[state.language].mainPost,
+      contentFormat: "post+story-share",
+    });
+
+    // Post day: S3
+    addPipelineScheduleItem(scheduleMap, toISODate(postDay), {
+      ...post,
+      type: "story",
+      sequence: "S3",
+      time: times.s3Time,
+      label: translations[state.language].story3,
+      description: translations[state.language].afterPost,
+      contentFormat: "story+reel",
+    });
+
+    // Day after: S2
+    function getNextPublishingDay(date) {
+      let result = addDays(new Date(date), 1);
+
+      while (isFriday(result)) {
+        result = addDays(result, 1);
+      }
+
+      return toISODate(result);
+    }
+
+    addPipelineScheduleItem(scheduleMap, nextPublishingDay, {
+      ...post,
+      date: nextPublishingDay,
+      type: "story",
+      sequence: "S2",
+      time: times.s2Time,
+      label: translations[state.language].story2,
+      description: translations[state.language].nextDay,
+      contentFormat: "story",
+    });
+
+    // Same next day: S4
+    addPipelineScheduleItem(scheduleMap, nextPublishingDay, {
+      ...post,
+      date: nextPublishingDay,
+      type: "story",
+      sequence: "S4",
+      time: times.s4Time,
+      label: translations[state.language].story4,
+      description: translations[state.language].finalFollowup,
+      contentFormat: "story+reel",
+    });
+  });
+
+  const days = [...scheduleMap.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([date, items]) => ({
+      date,
+      items: items.sort(
+        (a, b) => timeToMinutes(a.time) - timeToMinutes(b.time),
+      ),
+    }));
+
+  state.currentScheduleId = null;
+  state.currentScheduleName = null;
+  state.schedule = days;
+
+  saveState();
+  updateSaveButtonState();
+  renderSchedule();
+
+  showToast(translations[state.language].scheduleGenerated);
+
+  resultSection.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
 /* =========================================================
    BUILD POST QUEUE
    ========================================================= */
@@ -666,6 +883,120 @@ function buildPostQueue(campaigns) {
   return queue;
 }
 
+function buildPipelinePostQueue(campaigns) {
+  const queue = [];
+
+  if (!campaigns.length) {
+    return queue;
+  }
+
+  const maxPosts = Math.max(
+    ...campaigns.map((campaign) => Number(campaign.posts) || 0),
+  );
+
+  // Campaign start date = Day 1 of the pipeline.
+  let pipelineDay = parseDate(campaigns[0].startDate);
+
+  // Day 1 is the S1 day.
+  // First Main Post is therefore on the next publishing day.
+  let postDate = getNextPublishingDay(pipelineDay);
+
+  for (let postNumber = 1; postNumber <= maxPosts; postNumber++) {
+    for (
+      let campaignIndex = 0;
+      campaignIndex < campaigns.length;
+      campaignIndex++
+    ) {
+      const campaign = campaigns[campaignIndex];
+
+      if (postNumber > Number(campaign.posts)) {
+        continue;
+      }
+
+      queue.push({
+        id: `pipeline-${campaignIndex}-${postNumber}`,
+        campaignIndex,
+        campaignId: campaignIndex,
+        campaignName: campaign.name,
+        color: campaign.color,
+        postNumber,
+        date: postDate,
+      });
+
+      // Next Main Post is 2 publishing days later.
+      postDate = addPublishingDays(parseDate(postDate), 2);
+    }
+  }
+
+  return queue;
+}
+
+function addPublishingDays(date, days) {
+  let result = new Date(date);
+  let remaining = days;
+
+  while (remaining > 0) {
+    result = addDays(result, 1);
+
+    if (!isFriday(result)) {
+      remaining--;
+    }
+  }
+
+  return toISODate(result);
+}
+
+function getPipelinePostDate(queueIndex, campaigns) {
+  const firstCampaignDate = parseDate(campaigns[0].startDate);
+
+  let date = getNextPublishingDate(firstCampaignDate, queueIndex * 2);
+
+  return date;
+}
+
+function getNextPublishingDate(startDate, publishingDayOffset) {
+  let date = new Date(startDate);
+  let remaining = publishingDayOffset;
+
+  while (remaining > 0) {
+    date = addDays(date, 1);
+
+    if (!isFriday(date)) {
+      remaining--;
+    }
+  }
+
+  while (isFriday(date)) {
+    date = addDays(date, 1);
+  }
+
+  return toISODate(date);
+}
+
+function getNextPublishingDay(date) {
+  let result = new Date(date);
+
+  while (isFriday(result)) {
+    result = addDays(result, 1);
+  }
+
+  return toISODate(result);
+}
+
+function isFriday(date) {
+  return date.getDay() === 5;
+}
+
+function getPreviousPublishingDay(date) {
+  let result = addDays(new Date(date), -1);
+
+  while (isFriday(result)) {
+    result = addDays(result, -1);
+  }
+
+  return toISODate(result);
+}
+
 function addScheduleItem(scheduleMap, date, item) {
   if (!scheduleMap.has(date)) scheduleMap.set(date, []);
 
@@ -678,6 +1009,30 @@ function addScheduleItem(scheduleMap, date, item) {
   item.completed = false;
 
   scheduleMap.get(date).push(item);
+}
+function addPipelineScheduleItem(scheduleMap, date, item) {
+  const dateKey = typeof date === "string" ? date : toISODate(date);
+
+  if (isFriday(parseDate(dateKey))) {
+    return;
+  }
+
+  if (!scheduleMap.has(dateKey)) {
+    scheduleMap.set(dateKey, []);
+  }
+
+  item.slotId =
+    "pipeline-slot-" +
+    Date.now().toString(36) +
+    "-" +
+    Math.random().toString(36).substr(2, 5);
+
+  item.completed = false;
+
+  scheduleMap.get(dateKey).push({
+    ...item,
+    date: dateKey,
+  });
 }
 
 /* =========================================================
@@ -733,14 +1088,22 @@ function renderSchedule() {
     tr.appendChild(dayTd);
 
     // TIMES
-    const times = [
-      state.settings.story1Time,
-      state.settings.postTime,
-      state.settings.story2Time,
-      state.settings.followup1Time,
-      state.settings.followup2Time,
-    ];
-
+    const times =
+      state.strategy === "pipeline"
+        ? [
+            state.pipelineSettings.s1Time,
+            state.pipelineSettings.postTime,
+            state.pipelineSettings.s2Time,
+            state.pipelineSettings.s3Time,
+            state.pipelineSettings.s4Time,
+          ]
+        : [
+            state.settings.story1Time,
+            state.settings.postTime,
+            state.settings.story2Time,
+            state.settings.followup1Time,
+            state.settings.followup2Time,
+          ];
     times.forEach((time) => {
       const td = document.createElement("td");
       // Match exactly by stable time to retain columns LTR placement
@@ -885,6 +1248,8 @@ function confirmSaveSchedule() {
     campaigns: JSON.parse(JSON.stringify(state.campaigns)),
     schedule: JSON.parse(JSON.stringify(state.schedule)),
     settings: JSON.parse(JSON.stringify(state.settings)),
+    strategy: state.strategy,
+    pipelineSettings: JSON.parse(JSON.stringify(state.pipelineSettings)),
   };
 
   state.savedSchedules.push(snapshot);
@@ -912,6 +1277,8 @@ function updateActiveSavedSchedule(showNotify = false) {
     campaigns: JSON.parse(JSON.stringify(state.campaigns)),
     schedule: JSON.parse(JSON.stringify(state.schedule)),
     settings: JSON.parse(JSON.stringify(state.settings)),
+    strategy: state.strategy,
+    pipelineSettings: JSON.parse(JSON.stringify(state.pipelineSettings)),
   };
 
   saveState();
@@ -925,6 +1292,12 @@ function loadSavedSchedule(id) {
   state.campaigns = JSON.parse(JSON.stringify(snapshot.campaigns));
   state.schedule = JSON.parse(JSON.stringify(snapshot.schedule));
   state.settings = JSON.parse(JSON.stringify(snapshot.settings));
+  state.strategy = snapshot.strategy || "current";
+
+  state.pipelineSettings = {
+    ...state.pipelineSettings,
+    ...(snapshot.pipelineSettings || {}),
+  };
 
   state.currentScheduleId = snapshot.id;
   state.currentScheduleName = snapshot.name;
@@ -935,6 +1308,7 @@ function loadSavedSchedule(id) {
   saveState();
   renderCampaigns();
   syncSettingsInputs();
+  syncPipelineSettingsInputs();
   updateSaveButtonState();
   renderSavedSchedules();
   renderSchedule();
@@ -1102,31 +1476,48 @@ function closeModal() {
    ========================================================= */
 
 function updateTimeHeaders() {
-  const headers = [
-    ["headStory1", state.settings.story1Time],
-    ["headPost", state.settings.postTime],
-    ["headStory2", state.settings.story2Time],
-    ["headFollow1", state.settings.followup1Time],
-    ["headFollow2", state.settings.followup2Time],
+  const times =
+    state.strategy === "pipeline"
+      ? [
+          state.pipelineSettings.s1Time,
+          state.pipelineSettings.postTime,
+          state.pipelineSettings.s2Time,
+          state.pipelineSettings.s3Time,
+          state.pipelineSettings.s4Time,
+        ]
+      : [
+          state.settings.story1Time,
+          state.settings.postTime,
+          state.settings.story2Time,
+          state.settings.followup1Time,
+          state.settings.followup2Time,
+        ];
+
+  const headerIds = [
+    "headStory1",
+    "headPost",
+    "headStory2",
+    "headFollow1",
+    "headFollow2",
   ];
 
-  headers.forEach(([id, time]) => {
-    $("#" + id).textContent = formatPeriod(time);
+  times.forEach((time, index) => {
+    const element = $("#" + headerIds[index]);
+
+    if (element) {
+      element.textContent = formatPeriod(time);
+    }
   });
 
   const ths = document.querySelectorAll(".calendar-table thead th");
-  if (ths.length >= 7) {
-    const timeLabels = [
-      state.settings.story1Time,
-      state.settings.postTime,
-      state.settings.story2Time,
-      state.settings.followup1Time,
-      state.settings.followup2Time,
-    ];
 
-    timeLabels.forEach((time, index) => {
+  if (ths.length >= 7) {
+    times.forEach((time, index) => {
       const span = ths[index + 2].querySelector(".time-head");
-      if (span) span.textContent = formatTime(time);
+
+      if (span) {
+        span.textContent = formatTime(time);
+      }
     });
   }
 }
@@ -1142,6 +1533,29 @@ function syncSettingsInputs() {
   });
 }
 
+function syncPipelineSettingsInputs() {
+  const settings = state.pipelineSettings;
+
+  $("#pipelineS1Time").value = settings.s1Time;
+  $("#pipelinePostTime").value = settings.postTime;
+  $("#pipelineS2Time").value = settings.s2Time;
+  $("#pipelineS3Time").value = settings.s3Time;
+  $("#pipelineS4Time").value = settings.s4Time;
+
+  const pipelineRadio = $("#strategyPipeline");
+  const currentRadio = $("#strategyCurrent");
+
+  if (state.strategy === "pipeline") {
+    pipelineRadio.checked = true;
+    currentRadio.checked = false;
+    $("#pipelineSettings").classList.remove("hidden");
+  } else {
+    currentRadio.checked = true;
+    pipelineRadio.checked = false;
+    $("#pipelineSettings").classList.add("hidden");
+  }
+}
+
 function saveSettingsFromInputs() {
   state.settings = {
     story1Time: $("#story1Time").value,
@@ -1150,6 +1564,18 @@ function saveSettingsFromInputs() {
     followup1Time: $("#followup1Time").value,
     followup2Time: $("#followup2Time").value,
   };
+  saveState();
+}
+
+function savePipelineSettingsFromInputs() {
+  state.pipelineSettings = {
+    s1Time: $("#pipelineS1Time").value,
+    postTime: $("#pipelinePostTime").value,
+    s2Time: $("#pipelineS2Time").value,
+    s3Time: $("#pipelineS3Time").value,
+    s4Time: $("#pipelineS4Time").value,
+  };
+
   saveState();
 }
 
@@ -1228,6 +1654,8 @@ function saveState() {
       campaigns: state.campaigns,
       schedule: state.schedule,
       settings: state.settings,
+      strategy: state.strategy,
+      pipelineSettings: state.pipelineSettings,
       savedSchedules: state.savedSchedules,
       currentScheduleId: state.currentScheduleId,
       currentScheduleName: state.currentScheduleName,
@@ -1244,6 +1672,16 @@ function loadSavedData() {
     if (Array.isArray(data.campaigns)) state.campaigns = data.campaigns;
     if (Array.isArray(data.schedule)) state.schedule = data.schedule;
     if (data.settings) state.settings = { ...state.settings, ...data.settings };
+    if (data.strategy) {
+      state.strategy = data.strategy;
+    }
+
+    if (data.pipelineSettings) {
+      state.pipelineSettings = {
+        ...state.pipelineSettings,
+        ...data.pipelineSettings,
+      };
+    }
     if (data.language) state.language = data.language;
     if (data.theme) state.theme = data.theme;
 
@@ -1306,6 +1744,15 @@ function clearData() {
     followup1Time: "15:00",
     followup2Time: "17:00",
   };
+  state.strategy = "current";
+
+  state.pipelineSettings = {
+    s1Time: "09:00",
+    postTime: "11:00",
+    s2Time: "13:00",
+    s3Time: "15:00",
+    s4Time: "17:00",
+  };
 
   addCampaign({
     name: "",
@@ -1315,6 +1762,7 @@ function clearData() {
   });
 
   syncSettingsInputs();
+  syncPipelineSettingsInputs();
   renderSavedSchedules();
   updateSaveButtonState();
 

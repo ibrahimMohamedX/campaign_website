@@ -129,7 +129,7 @@
                 </p>
               </div>
               <div class="campaign-limit">
-                <span id="campaignCount">1</span>/3
+                <span id="campaignCount">1</span>/4
               </div>
             </div>
 
@@ -142,6 +142,46 @@
                 </button>
               </div>
               <div id="campaignsContainer"></div>
+            </div>
+
+            <!-- Scheduling Strategy -->
+            <div class="schedule-strategy">
+              <div class="settings-header">
+                <h3 data-i18n="schedulingSystem">Scheduling System</h3>
+              </div>
+
+              <div class="strategy-options">
+                <label class="strategy-option">
+                  <input
+                    type="radio"
+                    name="schedulingStrategy"
+                    value="current"
+                    id="strategyCurrent"
+                    checked
+                  />
+                  <div class="strategy-option-content">
+                    <strong data-i18n="currentSystem">Current System</strong>
+                    <small data-i18n="currentSystemDescription">
+                      Use the existing scheduling system.
+                    </small>
+                  </div>
+                </label>
+
+                <label class="strategy-option">
+                  <input
+                    type="radio"
+                    name="schedulingStrategy"
+                    value="pipeline"
+                    id="strategyPipeline"
+                  />
+                  <div class="strategy-option-content">
+                    <strong data-i18n="pipelineSystem">Pipeline System</strong>
+                    <small data-i18n="pipelineSystemDescription">
+                      Continuous overlapping content pipeline.
+                    </small>
+                  </div>
+                </label>
+              </div>
             </div>
 
             <!-- Global Settings -->
@@ -197,6 +237,79 @@
                     <input type="time" id="followup2Time" value="17:00" />
                   </div>
                   <small data-i18n="followupHint">Older story</small>
+                </div>
+              </div>
+              <!-- Pipeline Settings -->
+              <div class="pipeline-settings hidden" id="pipelineSettings">
+                <div class="settings-header">
+                  <h3 data-i18n="pipelineContentTimes">
+                    Pipeline Content Times
+                  </h3>
+                </div>
+
+                <div class="settings-grid">
+                  <div class="input-group">
+                    <label for="pipelineS1Time" data-i18n="pipelineS1Time">
+                      S1 Time
+                    </label>
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="pipelineS1Time" value="09:00" />
+                    </div>
+                    <small data-i18n="pipelineS1Hint">
+                      Before the main post
+                    </small>
+                  </div>
+
+                  <div class="input-group">
+                    <label for="pipelinePostTime" data-i18n="pipelinePostTime">
+                      Main Post Time
+                    </label>
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="pipelinePostTime" value="11:00" />
+                    </div>
+                    <small data-i18n="pipelinePostHint">
+                      Main post + story share
+                    </small>
+                  </div>
+
+                  <div class="input-group">
+                    <label for="pipelineS2Time" data-i18n="pipelineS2Time">
+                      S2 Time
+                    </label>
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="pipelineS2Time" value="13:00" />
+                    </div>
+                    <small data-i18n="pipelineS2Hint">
+                      Next day — image story
+                    </small>
+                  </div>
+
+                  <div class="input-group">
+                    <label for="pipelineS3Time" data-i18n="pipelineS3Time">
+                      S3 Time
+                    </label>
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="pipelineS3Time" value="15:00" />
+                    </div>
+                    <small data-i18n="pipelineS3Hint">
+                      Same day as main post
+                    </small>
+                  </div>
+
+                  <div class="input-group">
+                    <label for="pipelineS4Time" data-i18n="pipelineS4Time">
+                      S4 Time
+                    </label>
+                    <div class="time-input-wrapper">
+                      <span>◷</span>
+                      <input type="time" id="pipelineS4Time" value="17:00" />
+                    </div>
+                    <small data-i18n="pipelineS4Hint"> Next day </small>
+                  </div>
                 </div>
               </div>
             </div>
